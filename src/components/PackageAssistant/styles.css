@@ -36,31 +36,56 @@
   white-space: nowrap;
 }
 
-.assistant-response {
+.assistant-conversation {
+  display: grid;
+  gap: var(--space-md);
+}
+
+.assistant-message {
   padding: var(--space-lg);
   background: var(--color-surface);
   border: var(--rule-hair) solid var(--color-border);
   border-radius: var(--radius-md);
 }
 
-.assistant-response > div {
+.assistant-message--user {
+  width: min(88%, 720px);
+  margin-inline-start: auto;
+  background: var(--color-surface-raised, var(--color-surface));
+}
+
+.assistant-message-meta {
   display: flex;
   align-items: center;
   gap: var(--space-sm);
+  margin-block-end: var(--space-sm);
 }
 
-.assistant-response > div span,
-.assistant-response > p {
+.assistant-message-meta span,
+.assistant-message small {
   color: var(--color-text-muted);
   font-size: var(--text-xs);
 }
 
-.assistant-response pre {
-  margin-block: var(--space-md);
+.assistant-message > p {
+  margin: 0;
+}
+
+.assistant-message [data-streamdown] {
   color: var(--color-text);
-  font-family: var(--font-body);
-  white-space: pre-wrap;
-  overflow-wrap: anywhere;
+}
+
+.assistant-message [data-streamdown] > :first-child {
+  margin-block-start: 0;
+}
+
+.assistant-message [data-streamdown] > :last-child {
+  margin-block-end: var(--space-sm);
+}
+
+.assistant-message pre {
+  max-width: 100%;
+  overflow-x: auto;
 }
 
 @media (max-width: 768px) {

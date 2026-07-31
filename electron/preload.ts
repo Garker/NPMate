@@ -11,6 +11,8 @@ import type {
   AITestResult,
   AssistantRequest,
   AssistantResponse,
+  AssistantStreamRequest,
+  AssistantStreamEvent,
   SaveAIConfigInput,
 } from '../src/types/ai'
 import type {
@@ -98,6 +100,18 @@ const desktopApi = {
       request: AssistantRequest,
     ): Promise<AIOperationResult<AssistantResponse>> =>
       ipcRenderer.invoke('ai:assist', request),
+    startAssistStream: (request: AssistantStreamRequest): void =>
+      ipcRenderer.send('ai:assist-stream', request),
+    cancelAssistStream: (requestId: string): void =>
+      ipcRenderer.send('ai:assist-stream-cancel', requestId),
+    onAssistStreamEvent: (
+      listener: (event: AssistantStreamEvent) => void,
+    ): (() => void) => {
+      const handler = (_event: Electron.IpcRendererEvent, payload: AssistantStreamEvent) =>
+        listener(payload)
+      ipcRenderer.on('ai:assist-stream-event', handler)
+      return () => ipcRenderer.removeListener('ai:assist-stream-event', handler)
+    },
   },
   system: {
     environment: (): Promise<SystemOperationResult<EnvironmentInfo>> =>
