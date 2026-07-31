@@ -18,7 +18,7 @@ interface AppState {
  */
 export const useAppStore = create<AppState>((set) => ({
   activePage: 'dashboard',
-  colorMode: 'dark',
+  colorMode: 'light',
   selectedProjectId: null,
   setActivePage: (activePage) => set({ activePage }),
   toggleColorMode: () =>

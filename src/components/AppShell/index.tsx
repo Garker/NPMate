@@ -8,19 +8,27 @@ import {
   SettingOutlined,
   SunOutlined,
 } from '@ant-design/icons'
-import { Button, Input, Tag, Tooltip } from 'antd'
-import { useEffect, type ComponentType } from 'react'
+import { AutoComplete, Button, Input, Tooltip } from 'antd'
+import {
+  useEffect,
+  useRef,
+  useState,
+  type ComponentType,
+  type CSSProperties,
+  type PointerEvent as ReactPointerEvent,
+} from 'react'
+import type { RefSelectProps } from 'antd'
 import { DashboardPage } from '@/pages/Dashboard'
 import { ProjectsPage } from '@/pages/Projects'
 import { PackagesPage } from '@/pages/Packages'
 import { DependencyGraphPage } from '@/pages/DependencyGraph'
 import { AISettingsPage } from '@/pages/AISettings'
 import { SettingsPage } from '@/pages/Settings'
+import { PackageAssistant } from '@/components/PackageAssistant'
 import { useAppStore } from '@/stores/app.store'
 import type { PageKey } from '@/types/navigation'
 import { useDesktopStatus } from '@/hooks/useDesktopStatus'
 import { useProjectsStore } from '@/stores/projects.store'
-import { formatBytes } from '@/utils/format'
 import './styles.css'
 
 interface NavItem {
@@ -47,7 +55,22 @@ const pages: Record<PageKey, ComponentType> = {
   settings: SettingsPage,
 }
 
+const assistantMinimumWidth = 300
+const workspaceChromeMinimumWidth = 956
+
 export function AppShell() {
+  const [detailWidth, setDetailWidth] = useState(() =>
+    Math.min(
+      384,
+      Math.max(
+        assistantMinimumWidth,
+        window.innerWidth - workspaceChromeMinimumWidth,
+      ),
+    ),
+  )
+  const [searchText, setSearchText] = useState('')
+  const searchRef = useRef<RefSelectProps>(null)
+  const windowWidthRef = useRef(window.innerWidth)
   const activePage = useAppStore((state) => state.activePage)
   const colorMode = useAppStore((state) => state.colorMode)
   const setActivePage = useAppStore((state) => state.setActivePage)
@@ -68,25 +91,101 @@ export function AppShell() {
     }
   }, [loadProjects])
 
+  useEffect(() => {
+    const focusSearch = (event: KeyboardEvent) => {
+      if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'k') {
+        event.preventDefault()
+        searchRef.current?.focus()
+      }
+    }
+    window.addEventListener('keydown', focusSearch)
+    return () => window.removeEventListener('keydown', focusSearch)
+  }, [])
+
+  useEffect(() => {
+    const allocateResizeToAssistant = () => {
+      const nextWindowWidth = window.innerWidth
+      const delta = nextWindowWidth - windowWidthRef.current
+      windowWidthRef.current = nextWindowWidth
+      if (!delta) return
+      const maximumWidth = Math.max(
+        assistantMinimumWidth,
+        nextWindowWidth - workspaceChromeMinimumWidth,
+      )
+      setDetailWidth((width) =>
+        Math.min(maximumWidth, Math.max(assistantMinimumWidth, width + delta)),
+      )
+    }
+    window.addEventListener('resize', allocateResizeToAssistant)
+    return () => window.removeEventListener('resize', allocateResizeToAssistant)
+  }, [])
+
+  const searchOptions = [
+    ...navItems.map((item) => ({
+      value: `page:${item.key}`,
+      label: `页面 · ${item.label}`,
+    })),
+    ...projects.map((project) => ({
+      value: `project:${project.id}`,
+      label: `项目 · ${project.name}`,
+    })),
+  ]
+
+  function resizeDetailPanel(event: ReactPointerEvent<HTMLDivElement>) {
+    const maximumWidth = Math.max(
+      assistantMinimumWidth,
+      window.innerWidth - workspaceChromeMinimumWidth,
+    )
+    setDetailWidth(
+      Math.min(
+        maximumWidth,
+        Math.max(assistantMinimumWidth, window.innerWidth - event.clientX),
+      ),
+    )
+  }
+
   return (
-    <div className="app-shell" data-theme={colorMode}>
+    <div
+      className={`app-shell${window.npmate?.platform === 'darwin' ? ' is-macos' : ''}`}
+      data-theme={colorMode}
+      style={{ '--size-detail': `${detailWidth}px` } as CSSProperties}
+    >
       <header className="titlebar">
         <div className="brand">
           <span className="brand__mark" aria-hidden="true">
             N
           </span>
           <span>NPMate</span>
-          <Tag bordered={false}>Phase 7</Tag>
         </div>
 
-        <Input
+        <AutoComplete
+          ref={searchRef}
           className="command-search"
-          prefix={<SearchOutlined />}
-          suffix={<kbd>⌘ K</kbd>}
-          placeholder="搜索项目、包或命令"
-          aria-label="搜索项目、包或命令"
-          disabled
-        />
+          value={searchText}
+          options={searchOptions}
+          filterOption={(input, option) =>
+            String(option?.label ?? '')
+              .toLowerCase()
+              .includes(input.toLowerCase())
+          }
+          onChange={setSearchText}
+          onSelect={(value) => {
+            if (value.startsWith('page:')) {
+              setActivePage(value.slice(5) as PageKey)
+            } else if (value.startsWith('project:')) {
+              selectProject(value.slice(8))
+              setActivePage('dashboard')
+            }
+            setSearchText('')
+          }}
+        >
+          <Input
+            prefix={<SearchOutlined />}
+            suffix={<kbd>⌘ K</kbd>}
+            placeholder="搜索项目、页面或命令"
+            aria-label="搜索项目、页面或命令"
+          />
+        </AutoComplete>
 
         <Tooltip title={colorMode === 'dark' ? '切换浅色模式' : '切换暗色模式'}>
           <Button
@@ -159,41 +258,63 @@ export function AppShell() {
       </main>
 
       <aside className="detail-panel">
-        <span className="section-label">详情</span>
-        {selectedProject ? (
-          <dl className="project-detail">
-            <div>
-              <dt>框架</dt>
-              <dd>{selectedProject.framework}</dd>
-            </div>
-            <div>
-              <dt>包管理器</dt>
-              <dd>{selectedProject.packageManager}</dd>
-            </div>
-            <div>
-              <dt>Node</dt>
-              <dd>{selectedProject.nodeVersion}</dd>
-            </div>
-            <div>
-              <dt>生产依赖</dt>
-              <dd>{selectedProject.dependenciesCount}</dd>
-            </div>
-            <div>
-              <dt>开发依赖</dt>
-              <dd>{selectedProject.devDependenciesCount}</dd>
-            </div>
-            <div>
-              <dt>node_modules</dt>
-              <dd>{formatBytes(selectedProject.nodeModulesSize)}</dd>
-            </div>
-          </dl>
-        ) : (
-          <div className="empty-detail">
-            <BranchesOutlined />
-            <strong>选择一个项目</strong>
-            <p>项目元数据、依赖和操作将在这里显示。</p>
-          </div>
-        )}
+        <div
+          className="detail-resizer"
+          role="separator"
+          aria-label="调整 Package Assistant 宽度"
+          aria-orientation="vertical"
+          aria-valuemin={assistantMinimumWidth}
+          aria-valuemax={Math.max(
+            assistantMinimumWidth,
+            window.innerWidth - workspaceChromeMinimumWidth,
+          )}
+          aria-valuenow={detailWidth}
+          tabIndex={0}
+          onDoubleClick={() =>
+            setDetailWidth(
+              Math.min(
+                384,
+                Math.max(
+                  assistantMinimumWidth,
+                  window.innerWidth - workspaceChromeMinimumWidth,
+                ),
+              ),
+            )
+          }
+          onKeyDown={(event) => {
+            if (event.key === 'ArrowLeft') {
+              event.preventDefault()
+              setDetailWidth((width) =>
+                Math.min(
+                  Math.max(
+                    assistantMinimumWidth,
+                    window.innerWidth - workspaceChromeMinimumWidth,
+                  ),
+                  width + 16,
+                ),
+              )
+            }
+            if (event.key === 'ArrowRight') {
+              event.preventDefault()
+              setDetailWidth((width) =>
+                Math.max(assistantMinimumWidth, width - 16),
+              )
+            }
+          }}
+          onPointerDown={(event) => {
+            event.currentTarget.setPointerCapture(event.pointerId)
+            resizeDetailPanel(event)
+          }}
+          onPointerMove={(event) => {
+            if (event.currentTarget.hasPointerCapture(event.pointerId)) {
+              resizeDetailPanel(event)
+            }
+          }}
+          onPointerUp={(event) => {
+            event.currentTarget.releasePointerCapture(event.pointerId)
+          }}
+        />
+        <PackageAssistant />
       </aside>
 
       <footer className="statusbar">

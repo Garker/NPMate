@@ -13,6 +13,7 @@ interface RegistryState {
   loadingDetail: boolean
   error: string | null
   search: (query: string) => Promise<void>
+  clearSearch: () => void
   loadDetail: (name: string) => Promise<void>
   closeDetail: () => void
   clearError: () => void
@@ -39,6 +40,8 @@ export const useRegistryStore = create<RegistryState>((set) => ({
       set({ searching: false })
     }
   },
+
+  clearSearch: () => set({ query: '', results: [], error: null }),
 
   loadDetail: async (name) => {
     set({ loadingDetail: true, detail: null, error: null })

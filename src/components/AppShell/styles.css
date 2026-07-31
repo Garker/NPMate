@@ -6,13 +6,15 @@
 
 .app-shell {
   min-width: 0;
+  height: 100dvh;
   min-height: 100dvh;
+  overflow: hidden;
   display: grid;
   grid-template:
     'title title title title' var(--size-titlebar)
     'rail sidebar content detail' minmax(0, 1fr)
     'status status status status' var(--size-statusbar)
-    / var(--size-project-rail) var(--size-sidebar) minmax(0, 1fr) var(--size-detail);
+    / var(--size-project-rail) var(--size-sidebar) minmax(42rem, 1fr) var(--size-detail);
   background: var(--color-canvas);
   color: var(--color-text);
 }
@@ -30,6 +32,15 @@
   -webkit-app-region: drag;
 }
 
+.app-shell.is-macos {
+  grid-template-rows: 5.5rem minmax(0, 1fr) var(--size-statusbar);
+}
+
+.app-shell.is-macos .titlebar {
+  padding-block: 2.25rem 0.75rem;
+  padding-inline-start: 1.75rem;
+}
+
 .titlebar button,
 .titlebar input,
 .command-search {
@@ -39,6 +50,7 @@
 .brand {
   display: flex;
   align-items: center;
+  justify-self: start;
   gap: var(--space-sm);
   color: var(--color-text-strong);
   font-family: var(--font-display);
@@ -128,6 +140,7 @@
   padding-inline: var(--space-sm);
   display: flex;
   align-items: center;
+  justify-content: flex-start;
   gap: var(--space-sm);
   background: var(--color-sidebar);
   color: var(--color-text-muted);
@@ -188,62 +201,38 @@
 
 .detail-panel {
   grid-area: detail;
+  position: relative;
   min-width: 0;
-  padding: var(--space-lg);
+  padding: var(--space-md);
+  overflow: hidden;
   background: var(--color-sidebar);
   border-inline-start: var(--rule-hair) solid var(--color-border);
 }
 
-.empty-detail {
-  min-height: 16rem;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  justify-content: center;
-  color: var(--color-text-muted);
+.detail-resizer {
+  position: absolute;
+  z-index: 2;
+  inset-block: 0;
+  inset-inline-start: -0.3rem;
+  width: 0.6rem;
+  cursor: col-resize;
+  touch-action: none;
 }
 
-.empty-detail > svg {
-  margin-block-end: var(--space-lg);
-  color: var(--color-accent);
-  font-size: var(--text-xl);
+.detail-resizer::after {
+  content: '';
+  position: absolute;
+  inset-block: 0;
+  inset-inline-start: calc(50% - 0.5px);
+  width: 1px;
+  background: transparent;
+  transition: background-color var(--dur-short) var(--ease-out);
 }
 
-.empty-detail strong {
-  color: var(--color-text-strong);
-}
-
-.empty-detail p {
-  max-width: 24ch;
-  margin: var(--space-xs) 0 0;
-  font-size: var(--text-sm);
-}
-
-.project-detail {
-  margin: var(--space-xl) 0 0;
-}
-
-.project-detail div {
-  padding-block: var(--space-sm);
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: var(--space-md);
-  border-block-end: var(--rule-hair) solid var(--color-border);
-}
-
-.project-detail dt {
-  color: var(--color-text-muted);
-  font-size: var(--text-sm);
-}
-
-.project-detail dd {
-  margin: 0;
-  color: var(--color-text-strong);
-  font-size: var(--text-sm);
-  font-variant-numeric: tabular-nums;
-  text-align: end;
-  overflow-wrap: anywhere;
+.detail-resizer:hover::after,
+.detail-resizer:focus-visible::after,
+.detail-resizer:active::after {
+  background: var(--color-accent);
 }
 
 .statusbar {
@@ -319,7 +308,7 @@
   border-color: var(--color-success);
 }
 
-@media (max-width: 78rem) {
+@media (max-width: 80rem) {
   .app-shell {
     grid-template:
       'title title title' var(--size-titlebar)

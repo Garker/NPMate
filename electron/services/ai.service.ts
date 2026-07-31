@@ -26,6 +26,7 @@ import { PackageService } from './package.service'
 import { ProjectService } from './project.service'
 
 const configId = 'default'
+const modelTemperature = 0.2
 const providerDefaults: Record<AIProvider, { model: string; baseUrl: string }> = {
   openai: { model: 'gpt-4.1-mini', baseUrl: 'https://api.openai.com/v1' },
   deepseek: { model: 'deepseek-chat', baseUrl: 'https://api.deepseek.com' },
@@ -44,6 +45,7 @@ const providerDefaults: Record<AIProvider, { model: string; baseUrl: string }> =
 
 interface StoredConfig extends AIConfig {
   apiKey: string
+  temperature: number
 }
 
 function encryptApiKey(value: string): string {
@@ -98,7 +100,6 @@ export class AiService {
       return {
         provider: 'openai',
         ...defaults,
-        temperature: 0.2,
         apiKeyConfigured: false,
       }
     }
@@ -106,7 +107,6 @@ export class AiService {
       provider: row.provider as AIProvider,
       model: row.model,
       baseUrl: row.baseUrl,
-      temperature: row.temperature / 100,
       apiKeyConfigured: Boolean(row.encryptedApiKey),
     }
   }
@@ -125,7 +125,7 @@ export class AiService {
       provider: input.provider,
       model: input.model.trim(),
       baseUrl: input.baseUrl.trim(),
-      temperature: Math.round(Math.min(1, Math.max(0, input.temperature)) * 100),
+      temperature: Math.round(modelTemperature * 100),
       encryptedApiKey,
       updatedAt: new Date().toISOString(),
     }
@@ -141,6 +141,18 @@ export class AiService {
     return this.getConfig()
   }
 
+  deleteApiKey(): AIConfig {
+    getDatabase()
+      .update(aiSettings)
+      .set({
+        encryptedApiKey: null,
+        updatedAt: new Date().toISOString(),
+      })
+      .where(eq(aiSettings.id, configId))
+      .run()
+    return this.getConfig()
+  }
+
   private storedConfig(): StoredConfig {
     const visible = this.getConfig()
     const row = getDatabase()
@@ -148,7 +160,28 @@ export class AiService {
       .from(aiSettings)
       .where(eq(aiSettings.id, configId))
       .get()
-    return { ...visible, apiKey: decryptApiKey(row?.encryptedApiKey ?? null) }
+    return {
+      ...visible,
+      apiKey: decryptApiKey(row?.encryptedApiKey ?? null),
+      temperature: modelTemperature,
+    }
+  }
+
+  private testConfig(input: SaveAIConfigInput): StoredConfig {
+    const saved = this.storedConfig()
+    const config = {
+      provider: input.provider,
+      model: input.model.trim(),
+      baseUrl: input.baseUrl.trim(),
+      temperature: modelTemperature,
+      apiKeyConfigured: Boolean(input.apiKey?.trim() || saved.apiKey),
+      apiKey: input.apiKey?.trim() || saved.apiKey,
+    }
+    if (!config.model) throw new Error('模型名称不能为空。')
+    if (config.provider !== 'ollama' && !config.apiKey) {
+      throw new Error('请输入 API Key，或先保存一个 API Key。')
+    }
+    return config
   }
 
   private model(config: StoredConfig) {
@@ -183,8 +216,8 @@ export class AiService {
     })
   }
 
-  async test(): Promise<AITestResult> {
-    const config = this.storedConfig()
+  async test(input: SaveAIConfigInput): Promise<AITestResult> {
+    const config = this.testConfig(input)
     try {
       const started = Date.now()
       const response = await this.model(config).invoke(

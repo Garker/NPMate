@@ -7,6 +7,10 @@
   gap: var(--space-md);
 }
 
+.package-list-search {
+  width: min(24rem, 32vw);
+}
+
 .package-summary {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr)) auto;
@@ -31,18 +35,18 @@
   white-space: nowrap;
 }
 
-.package-summary span,
-.package-summary strong {
+.package-summary > div span,
+.package-summary > div strong {
   display: block;
 }
 
-.package-summary span {
+.package-summary > div span {
   margin-block-end: var(--space-xs);
   color: var(--color-text-muted);
   font-size: var(--text-xs);
 }
 
-.package-summary strong {
+.package-summary > div strong {
   overflow: hidden;
   color: var(--color-text-strong);
   text-overflow: ellipsis;

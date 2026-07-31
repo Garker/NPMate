@@ -10,6 +10,10 @@ export default function App() {
     <ConfigProvider
       theme={{
         ...antTheme,
+        token: {
+          ...antTheme.token,
+          colorPrimary: colorMode === 'dark' ? '#6f95ff' : '#1769e0',
+        },
         algorithm:
           colorMode === 'dark'
             ? antdTheme.darkAlgorithm

@@ -1,6 +1,6 @@
 import { RobotOutlined, SendOutlined, StopOutlined } from '@ant-design/icons'
 import { useChat } from '@ai-sdk/react'
-import { Alert, Button, Empty, Input, Tag } from 'antd'
+import { Alert, Button, Empty, Input } from 'antd'
 import { useEffect, useMemo, useState } from 'react'
 import { Streamdown } from 'streamdown'
 import type { UIMessage } from 'ai'
@@ -41,35 +41,14 @@ export function PackageAssistant() {
           <RobotOutlined />
           <h2>Package Assistant</h2>
         </div>
-        <Tag>只读 Agent</Tag>
       </header>
       {!selectedProjectId ? (
-        <Empty description="选择项目后即可分析技术栈与依赖。" />
+        <Empty
+          className="assistant-empty"
+          description="选择项目后即可分析技术栈与依赖。"
+        />
       ) : (
         <>
-          <div className="assistant-prompt">
-            <Input.TextArea
-              value={prompt}
-              autoSize={{ minRows: 2, maxRows: 5 }}
-              placeholder="例如：我要实现文件上传，应该使用现有组件还是安装新依赖？"
-              onChange={(event) => setPrompt(event.target.value)}
-              onPressEnter={(event) => {
-                if (!event.shiftKey) {
-                  event.preventDefault()
-                  submit()
-                }
-              }}
-            />
-            <Button
-              type="primary"
-              icon={<SendOutlined />}
-              loading={assisting}
-              disabled={!prompt.trim()}
-              onClick={submit}
-            >
-              分析
-            </Button>
-          </div>
           {(error || configError) && (
             <Alert
               type="error"
@@ -100,6 +79,29 @@ export function PackageAssistant() {
               停止生成
             </Button>
           )}
+          <div className="assistant-prompt">
+            <Input.TextArea
+              value={prompt}
+              autoSize={{ minRows: 2, maxRows: 5 }}
+              placeholder="例如：我要实现文件上传，应该使用现有组件还是安装新依赖？"
+              onChange={(event) => setPrompt(event.target.value)}
+              onPressEnter={(event) => {
+                if (!event.shiftKey) {
+                  event.preventDefault()
+                  submit()
+                }
+              }}
+            />
+            <Button
+              type="primary"
+              icon={<SendOutlined />}
+              loading={assisting}
+              disabled={!prompt.trim()}
+              onClick={submit}
+            >
+              分析
+            </Button>
+          </div>
         </>
       )}
     </section>

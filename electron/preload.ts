@@ -94,8 +94,12 @@ const desktopApi = {
       input: SaveAIConfigInput,
     ): Promise<AIOperationResult<AIConfig>> =>
       ipcRenderer.invoke('ai:save-config', input),
-    test: (): Promise<AIOperationResult<AITestResult>> =>
-      ipcRenderer.invoke('ai:test'),
+    deleteApiKey: (): Promise<AIOperationResult<AIConfig>> =>
+      ipcRenderer.invoke('ai:delete-api-key'),
+    test: (
+      input: SaveAIConfigInput,
+    ): Promise<AIOperationResult<AITestResult>> =>
+      ipcRenderer.invoke('ai:test', input),
     assist: (
       request: AssistantRequest,
     ): Promise<AIOperationResult<AssistantResponse>> =>

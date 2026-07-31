@@ -5,7 +5,6 @@ import type { ThemeConfig } from 'antd'
  */
 export const antTheme: ThemeConfig = {
   token: {
-    colorPrimary: 'var(--color-accent)',
     borderRadius: 6,
     controlHeight: 36,
     fontFamily: 'var(--font-body)',
@@ -13,6 +12,7 @@ export const antTheme: ThemeConfig = {
   components: {
     Button: {
       primaryShadow: 'none',
+      primaryColor: '#ffffff',
       defaultShadow: 'none',
     },
     Input: {

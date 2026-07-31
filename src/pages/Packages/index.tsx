@@ -50,6 +50,7 @@ function formatDownloads(value: number | null): string {
 export function PackagesPage() {
   const [mode, setMode] = useState<'installed' | 'registry'>('installed')
   const [installOpen, setInstallOpen] = useState(false)
+  const [installedSearchText, setInstalledSearchText] = useState('')
   const [searchText, setSearchText] = useState('')
   const [form] = Form.useForm<InstallFormValues>()
   const projects = useProjectsStore((state) => state.projects)
@@ -59,6 +60,8 @@ export function PackagesPage() {
   const loadPackages = usePackagesStore((state) => state.load)
   const resetPackages = usePackagesStore((state) => state.reset)
   const registryState = useRegistryStore()
+  const searchRegistry = useRegistryStore((state) => state.search)
+  const clearRegistrySearch = useRegistryStore((state) => state.clearSearch)
   const selectedProject = projects.find(
     (project) => project.id === selectedProjectId,
   )
@@ -67,6 +70,19 @@ export function PackagesPage() {
     if (selectedProjectId) void loadPackages(selectedProjectId)
     else resetPackages()
   }, [loadPackages, resetPackages, selectedProjectId])
+
+  useEffect(() => {
+    if (mode !== 'registry') return
+    const query = searchText.trim()
+    if (!query) {
+      clearRegistrySearch()
+      return
+    }
+    const timer = window.setTimeout(() => {
+      void searchRegistry(query)
+    }, 300)
+    return () => window.clearTimeout(timer)
+  }, [clearRegistrySearch, mode, searchRegistry, searchText])
 
   const counts = useMemo(
     () => ({
@@ -79,6 +95,13 @@ export function PackagesPage() {
     }),
     [packageState.dependencies],
   )
+  const filteredDependencies = useMemo(() => {
+    const query = installedSearchText.trim().toLowerCase()
+    if (!query) return packageState.dependencies
+    return packageState.dependencies.filter((item) =>
+      item.name.toLowerCase().includes(query),
+    )
+  }, [installedSearchText, packageState.dependencies])
 
   async function runAction(
     item: InstalledPackage,
@@ -157,7 +180,6 @@ export function PackagesPage() {
             onConfirm={() => void runAction(item, 'upgrade')}
           >
             <Button
-              type="text"
               size="small"
               icon={<ReloadOutlined />}
               loading={packageState.executingPackage === item.name}
@@ -176,7 +198,6 @@ export function PackagesPage() {
             onConfirm={() => void runAction(item, 'uninstall')}
           >
             <Button
-              type="text"
               size="small"
               danger
               icon={<DeleteOutlined />}
@@ -231,7 +252,6 @@ export function PackagesPage() {
             </Button>
           )}
           <Button
-            type="text"
             size="small"
             icon={<DownloadOutlined />}
             disabled={!selectedProject}
@@ -249,14 +269,26 @@ export function PackagesPage() {
       title="包管理"
       description="管理已安装依赖，或从 npm Registry 查找适合项目的包。"
       action={
-        <Segmented
-          value={mode}
-          options={[
-            { label: '已安装', value: 'installed' },
-            { label: 'Registry 搜索', value: 'registry' },
-          ]}
-          onChange={(value) => setMode(value as typeof mode)}
-        />
+        <Space size={8}>
+          {mode === 'installed' && (
+            <Input
+              className="package-list-search"
+              allowClear
+              prefix={<SearchOutlined />}
+              placeholder="按包名筛选已安装依赖"
+              value={installedSearchText}
+              onChange={(event) => setInstalledSearchText(event.target.value)}
+            />
+          )}
+          <Segmented
+            value={mode}
+            options={[
+              { label: '已安装', value: 'installed' },
+              { label: 'Registry 搜索', value: 'registry' },
+            ]}
+            onChange={(value) => setMode(value as typeof mode)}
+          />
+        </Space>
       }
     >
       {mode === 'installed' ? (
@@ -305,7 +337,7 @@ export function PackagesPage() {
               <Table
                 rowKey={(item) => `${item.kind}:${item.name}`}
                 columns={installedColumns}
-                dataSource={packageState.dependencies}
+                dataSource={filteredDependencies}
                 loading={packageState.loading}
                 pagination={false}
               />
@@ -314,15 +346,12 @@ export function PackagesPage() {
         )
       ) : (
         <div className="registry-workbench">
-          <Input.Search
+          <Input
             size="large"
             prefix={<SearchOutlined />}
             placeholder="搜索 npm 包，例如 react-query"
             value={searchText}
-            loading={registryState.searching}
-            enterButton="搜索"
             onChange={(event) => setSearchText(event.target.value)}
-            onSearch={(value) => void registryState.search(value)}
           />
           {registryState.error && (
             <Alert
