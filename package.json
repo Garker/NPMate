@@ -12,7 +12,10 @@
     "url": "https://github.com/Garker/NPMate/issues"
   },
   "description": "AI JavaScript package manager desktop application",
-  "author": "NPMate contributors",
+  "author": {
+    "name": "NPMate contributors",
+    "email": "56073411+Garker@users.noreply.github.com"
+  },
   "type": "module",
   "main": "./out/main/main.js",
   "scripts": {
