@@ -1,5 +1,10 @@
 # NPMate Release Notes
 
+## 0.1.1
+
+- 修复 macOS 安装包启动时因 LangGraph SDK 嵌套依赖未被收集而出现的 `ERR_MODULE_NOT_FOUND`。
+- 将 `langchain` 内联到 Electron 主进程 bundle，避免运行时依赖包管理器的私有目录结构。
+
 ## 自动发布流程
 
 GitHub Actions 会在推送 `v*` 标签时，分别在 macOS、Windows 和 Linux runner 上构建安装包，生成 `electron-updater` 所需的 `latest*.yml` 与差分下载元数据、生成 `SHA256SUMS.txt`，然后创建 GitHub Release 并上传全部文件。
