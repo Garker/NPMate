@@ -14,7 +14,6 @@ export interface AIConfig {
   provider: AIProvider
   model: string
   baseUrl: string
-  temperature: number
   apiKeyConfigured: boolean
 }
 
@@ -22,7 +21,6 @@ export interface SaveAIConfigInput {
   provider: AIProvider
   model: string
   baseUrl: string
-  temperature: number
   apiKey?: string
 }
 

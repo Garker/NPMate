@@ -32,7 +32,24 @@ input {
 }
 
 button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   cursor: pointer;
+  text-align: center;
+}
+
+.ant-btn {
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.ant-btn.ant-btn-primary.ant-btn-color-primary.ant-btn-variant-solid:not(:disabled),
+.ant-btn.ant-btn-primary.ant-btn-color-primary.ant-btn-variant-solid:not(:disabled):hover,
+.ant-btn.ant-btn-primary.ant-btn-color-primary.ant-btn-variant-solid:not(:disabled):active,
+.ant-btn.ant-btn-primary.ant-btn-color-primary.ant-btn-variant-solid:not(:disabled) .anticon {
+  color: var(--color-accent-ink);
 }
 
 :focus {

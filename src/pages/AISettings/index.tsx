@@ -1,5 +1,5 @@
 import { CheckCircleOutlined, ExperimentOutlined, LockOutlined } from '@ant-design/icons'
-import { Alert, Button, Form, Input, Select, Slider, Space, Tag } from 'antd'
+import { Alert, Button, Form, Input, Popconfirm, Select, Space, Tag } from 'antd'
 import { useEffect } from 'react'
 import { PageFrame } from '@/components/PageFrame'
 import { useAIStore } from '@/stores/ai.store'
@@ -35,8 +35,18 @@ export function AISettingsPage() {
   const error = useAIStore((state) => state.error)
   const load = useAIStore((state) => state.load)
   const save = useAIStore((state) => state.save)
+  const deleteApiKey = useAIStore((state) => state.deleteApiKey)
   const test = useAIStore((state) => state.test)
   const clearError = useAIStore((state) => state.clearError)
+
+  const testConnection = async () => {
+    try {
+      const values = await form.validateFields()
+      await test(values)
+    } catch {
+      // Ant Design 会在对应字段旁展示校验错误。
+    }
+  }
 
   useEffect(() => {
     void load()
@@ -48,7 +58,6 @@ export function AISettingsPage() {
         provider: config.provider,
         model: config.model,
         baseUrl: config.baseUrl,
-        temperature: config.temperature,
         apiKey: '',
       })
     }
@@ -68,7 +77,7 @@ export function AISettingsPage() {
         <Form
           form={form}
           layout="vertical"
-          initialValues={{ provider: 'openai', temperature: 0.2 }}
+          initialValues={{ provider: 'openai' }}
           onFinish={(values) => void save(values)}
           onValuesChange={(changed) => {
             if (changed.provider) {
@@ -91,14 +100,27 @@ export function AISettingsPage() {
           <Form.Item name="baseUrl" label="Base URL">
             <Input placeholder="OpenAI Compatible API 地址" />
           </Form.Item>
-          <Form.Item name="temperature" label="Temperature">
-            <Slider min={0} max={1} step={0.1} marks={{ 0: '0', 0.5: '0.5', 1: '1' }} />
-          </Form.Item>
           <Space>
             <Button type="primary" htmlType="submit" loading={loading}>保存配置</Button>
-            <Button icon={<ExperimentOutlined />} loading={testing} disabled={!config} onClick={() => void test()}>
+            <Button
+              icon={<ExperimentOutlined />}
+              loading={testing}
+              onClick={() => void testConnection()}
+            >
               测试连接
             </Button>
+            {config?.apiKeyConfigured && (
+              <Popconfirm
+                title="删除已保存的 API Key？"
+                description="删除后无法恢复，需要重新输入才能连接模型。"
+                okText="删除"
+                cancelText="取消"
+                okButtonProps={{ danger: true }}
+                onConfirm={() => deleteApiKey()}
+              >
+                <Button danger loading={loading}>删除已保存密钥</Button>
+              </Popconfirm>
+            )}
           </Space>
         </Form>
 

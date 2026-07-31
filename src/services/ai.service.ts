@@ -23,7 +23,9 @@ export const aiService = {
   getConfig: (): Promise<AIConfig> => unwrap(api().getConfig()),
   saveConfig: (input: SaveAIConfigInput): Promise<AIConfig> =>
     unwrap(api().saveConfig(input)),
-  test: (): Promise<AITestResult> => unwrap(api().test()),
+  deleteApiKey: (): Promise<AIConfig> => unwrap(api().deleteApiKey()),
+  test: (input: SaveAIConfigInput): Promise<AITestResult> =>
+    unwrap(api().test(input)),
   assist: (request: AssistantRequest): Promise<AssistantResponse> =>
     unwrap(api().assist(request)),
 }

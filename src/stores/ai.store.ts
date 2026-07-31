@@ -17,7 +17,8 @@ interface AIState {
   error: string | null
   load: () => Promise<void>
   save: (input: SaveAIConfigInput) => Promise<boolean>
-  test: () => Promise<void>
+  deleteApiKey: () => Promise<void>
+  test: (input: SaveAIConfigInput) => Promise<void>
   assist: (projectId: string, prompt: string) => Promise<void>
   clearError: () => void
 }
@@ -52,10 +53,20 @@ export const useAIStore = create<AIState>((set) => ({
       set({ loading: false })
     }
   },
-  test: async () => {
+  deleteApiKey: async () => {
+    set({ loading: true, error: null, testResult: null })
+    try {
+      set({ config: await aiService.deleteApiKey() })
+    } catch (error) {
+      set({ error: error instanceof Error ? error.message : 'API Key 删除失败。' })
+    } finally {
+      set({ loading: false })
+    }
+  },
+  test: async (input) => {
     set({ testing: true, error: null, testResult: null })
     try {
-      set({ testResult: await aiService.test() })
+      set({ testResult: await aiService.test(input) })
     } catch (error) {
       set({ error: error instanceof Error ? error.message : 'AI 连接测试失败。' })
     } finally {

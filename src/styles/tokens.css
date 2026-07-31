@@ -56,7 +56,7 @@
   --size-statusbar: 1.75rem;
   --size-project-rail: 3.75rem;
   --size-sidebar: 14rem;
-  --size-detail: 17rem;
+  --size-detail: 24rem;
 }
 
 [data-theme='dark'] {

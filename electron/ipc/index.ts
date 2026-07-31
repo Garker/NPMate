@@ -301,11 +301,22 @@ export function registerIpcHandlers(): void {
     },
   )
 
+  ipcMain.handle('ai:delete-api-key', (): AIOperationResult<AIConfig> => {
+    try {
+      return success(aiService.deleteApiKey())
+    } catch (error) {
+      return failure(error)
+    }
+  })
+
   ipcMain.handle(
     'ai:test',
-    async (): Promise<AIOperationResult<AITestResult>> => {
+    async (
+      _event,
+      input: SaveAIConfigInput,
+    ): Promise<AIOperationResult<AITestResult>> => {
       try {
-        return success(await aiService.test())
+        return success(await aiService.test(input))
       } catch (error) {
         return failure(error)
       }
