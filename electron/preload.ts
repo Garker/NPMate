@@ -32,6 +32,7 @@ import type {
   RegistryPackageDetail,
   RegistryPackageSummary,
 } from '../src/types/package'
+import type { UpdateOperationResult, UpdateState } from '../src/types/update'
 
 const desktopApi = {
   /**
@@ -39,6 +40,20 @@ const desktopApi = {
    */
   ping: (): Promise<string> => ipcRenderer.invoke('app:ping'),
   platform: process.platform,
+  update: {
+    getState: (): Promise<UpdateState> => ipcRenderer.invoke('update:get-state'),
+    check: (): Promise<UpdateOperationResult> => ipcRenderer.invoke('update:check'),
+    download: (): Promise<UpdateOperationResult> =>
+      ipcRenderer.invoke('update:download'),
+    install: (): Promise<UpdateOperationResult> =>
+      ipcRenderer.invoke('update:install'),
+    onStateChanged: (listener: (state: UpdateState) => void): (() => void) => {
+      const handler = (_event: Electron.IpcRendererEvent, state: UpdateState) =>
+        listener(state)
+      ipcRenderer.on('update:state-changed', handler)
+      return () => ipcRenderer.removeListener('update:state-changed', handler)
+    },
+  },
   projects: {
     list: (): Promise<ProjectOperationResult<ProjectRecord[]>> =>
       ipcRenderer.invoke('project:list'),

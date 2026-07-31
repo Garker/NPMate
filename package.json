@@ -43,6 +43,7 @@
     "antd": "latest",
     "better-sqlite3": "^13.0.2",
     "drizzle-orm": "^0.45.2",
+    "electron-updater": "^6.8.9",
     "langchain": "^1.5.4",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
@@ -83,6 +84,12 @@
       "output": "release"
     },
     "artifactName": "${productName}-${version}-${os}-${arch}.${ext}",
+    "publish": {
+      "provider": "github",
+      "owner": "Garker",
+      "repo": "NPMate",
+      "releaseType": "release"
+    },
     "files": [
       "out/**/*",
       "package.json"

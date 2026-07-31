@@ -54,6 +54,8 @@ jobs:
             release/*.exe
             release/*.AppImage
             release/*.deb
+            release/*.blockmap
+            release/latest*.yml
           if-no-files-found: error
 
   publish:

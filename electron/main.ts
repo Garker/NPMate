@@ -1,6 +1,6 @@
 import { join } from 'node:path'
 import { app, BrowserWindow, shell } from 'electron'
-import { registerIpcHandlers } from './ipc'
+import { registerIpcHandlers, updateService } from './ipc'
 
 let mainWindow: BrowserWindow | null = null
 
@@ -47,6 +47,7 @@ function createMainWindow(): void {
 app.whenReady().then(() => {
   registerIpcHandlers()
   createMainWindow()
+  updateService.initialize()
 
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) {
