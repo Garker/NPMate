@@ -1,5 +1,9 @@
 # NPMate
 
+[![CI](https://github.com/Garker/NPMate/actions/workflows/ci.yml/badge.svg)](https://github.com/Garker/NPMate/actions/workflows/ci.yml)
+[![Release](https://github.com/Garker/NPMate/actions/workflows/release.yml/badge.svg)](https://github.com/Garker/NPMate/actions/workflows/release.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+
 NPMate 是一个基于 Electron + React 的智能 JavaScript 项目依赖管理桌面应用。
 
 当前完成：**Phase 7 — 桌面打包与发布准备**。
@@ -51,32 +55,43 @@ NPMate 是一个基于 Electron + React 的智能 JavaScript 项目依赖管理�
 - Node.js 20 或更高版本
 - npm 10、pnpm 9 或 Bun 1.1+
 
-## 安装与启动
+## 安装
+
+前往 [GitHub Releases](https://github.com/Garker/NPMate/releases/latest) 下载对应系统的安装包：
+
+- macOS：`.dmg`（或免安装的 `.zip`）
+- Windows：NSIS `.exe`
+- Linux：`.AppImage` 或 `.deb`
+
+当前自动构建的安装包未进行商业代码签名。macOS 和 Windows 首次启动时可能显示系统安全提示，请只从本仓库的 Releases 下载，并可使用 Release 中的 `SHA256SUMS.txt` 校验文件完整性。
+
+## 本地开发
 
 ```bash
-cd npmate
-npm install
-npm run dev
+git clone https://github.com/Garker/NPMate.git
+cd NPMate
+bun install --frozen-lockfile
+bun run dev
 ```
 
 类型检查与构建：
 
 ```bash
-npm run typecheck
-npm run build
+bun run typecheck
+bun run build
 ```
 
 重建原生 SQLite 模块并生成当前平台安装包：
 
 ```bash
-npm run rebuild:native
-npm run dist
+bun run rebuild:native
+bun run dist
 ```
 
 仅生成未压缩应用目录，用于本地安装前检查：
 
 ```bash
-npm run dist:dir
+bun run dist:dir
 ```
 
 产物输出到 `release/`。正式发布前应配置对应平台的代码签名与公证凭据。
@@ -97,3 +112,7 @@ npm run dist:dir
 5. 依赖升级、依赖图和 node_modules 分析（已完成）
 6. AI 配置与 Package Assistant Agent（已完成）
 7. 打包与发布（已完成）
+
+## 参与贡献
+
+欢迎提交 Issue 和 Pull Request。开始前请阅读 [贡献指南](CONTRIBUTING.md)；安全问题请按 [安全策略](SECURITY.md) 私下报告。本项目采用 [MIT License](LICENSE)。

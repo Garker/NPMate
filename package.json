@@ -2,6 +2,15 @@
   "name": "npmate",
   "version": "0.1.0",
   "private": true,
+  "license": "MIT",
+  "homepage": "https://github.com/Garker/NPMate",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Garker/NPMate.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Garker/NPMate/issues"
+  },
   "description": "AI JavaScript package manager desktop application",
   "author": "NPMate contributors",
   "type": "module",
@@ -13,6 +22,7 @@
     "typecheck": "tsc --noEmit -p tsconfig.web.json && tsc --noEmit -p tsconfig.node.json",
     "lint": "eslint .",
     "format": "prettier --write .",
+    "format:check": "prettier --check .",
     "rebuild:native": "electron-rebuild -f -w better-sqlite3",
     "dist": "npm run build && electron-builder",
     "dist:dir": "npm run build && electron-builder --dir"
@@ -78,6 +88,7 @@
       "package.json"
     ],
     "mac": {
+      "icon": "build/icon.icns",
       "category": "public.app-category.developer-tools",
       "target": [
         "dmg",
@@ -85,6 +96,7 @@
       ]
     },
     "win": {
+      "icon": "build/icon.ico",
       "target": "nsis",
       "verifyUpdateCodeSignature": false
     },
@@ -93,6 +105,7 @@
       "allowToChangeInstallationDirectory": true
     },
     "linux": {
+      "icon": "build/icon.png",
       "category": "Development",
       "target": [
         "AppImage",
