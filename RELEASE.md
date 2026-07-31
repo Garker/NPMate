@@ -1,5 +1,23 @@
 # NPMate Release Notes
 
+## 自动发布流程
+
+GitHub Actions 会在推送 `v*` 标签时，分别在 macOS、Windows 和 Linux runner 上构建安装包，生成 `SHA256SUMS.txt`，然后创建 GitHub Release 并上传全部文件。
+
+发布新版本：
+
+```bash
+# 先更新 package.json 中的 version 并合并到 main
+git tag v0.2.0
+git push origin v0.2.0
+```
+
+标签必须与 `package.json` 版本一致，否则构建会失败。也可以在 Actions 页面手动运行 Release 工作流，只构建并保留安装包 artifact，不创建正式 Release。
+
+### 代码签名
+
+默认工作流显式关闭自动证书发现，产物不带商业代码签名。要公开提供已签名/公证的安装包，需要在仓库 Secrets 中配置 Apple Developer ID、公证凭据和 Windows 代码签名证书，并相应扩展 Release 工作流。
+
 ## 0.1.0
 
 Phase 1–7 的本地桌面功能已经完成，并生成 macOS arm64 验证产物。
@@ -17,6 +35,6 @@ Phase 1–7 的本地桌面功能已经完成，并生成 macOS arm64 验证产�
 298c711ecd5b1b2dad370889e4e62d7a1e4f9d92e871555d59b071b2ec4d8f0c  NPMate-0.1.0-mac-arm64.zip
 ```
 
-### 发布前检查
+### 历史构建说明
 
 当前文件是本地验证构建，尚未配置品牌图标、Apple Developer ID 签名和 notarization。公开分发前需要补齐这些平台凭据，并在 Windows、Linux 构建机分别生成和验证对应产物。
