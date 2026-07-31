@@ -22,6 +22,7 @@ import type {
   SystemOperationResult,
 } from '../../src/types/system'
 import type { ProjectOperationResult, ProjectRecord } from '../../src/types/project'
+import type { UpdateOperationResult, UpdateState } from '../../src/types/update'
 import type {
   PackageCommandRequest,
   PackageCommandResult,
@@ -37,6 +38,7 @@ import { AnalysisService } from '../services/analysis.service'
 import { AiService } from '../services/ai.service'
 import { EnvironmentService } from '../services/environment.service'
 import { HistoryService } from '../services/history.service'
+import { UpdateService } from '../services/update.service'
 
 const projectService = new ProjectService()
 const packageManagerService = new PackageManagerService()
@@ -45,6 +47,7 @@ const analysisService = new AnalysisService()
 const aiService = new AiService()
 const environmentService = new EnvironmentService()
 const historyService = new HistoryService()
+export const updateService = new UpdateService()
 const assistantStreams = new Map<string, AbortController>()
 
 function success<T>(data: T): ProjectOperationResult<T> {
@@ -64,6 +67,16 @@ function failure<T>(error: unknown): ProjectOperationResult<T> {
  */
 export function registerIpcHandlers(): void {
   ipcMain.handle('app:ping', () => 'pong')
+  ipcMain.handle('update:get-state', (): UpdateState => updateService.getState())
+  ipcMain.handle('update:check', (): Promise<UpdateOperationResult> =>
+    updateService.check(),
+  )
+  ipcMain.handle('update:download', (): Promise<UpdateOperationResult> =>
+    updateService.download(),
+  )
+  ipcMain.handle('update:install', (): UpdateOperationResult =>
+    updateService.install(),
+  )
 
   ipcMain.handle(
     'project:list',

@@ -1,6 +1,7 @@
 import {
   CheckCircleOutlined,
   CloseCircleOutlined,
+  CloudDownloadOutlined,
   ReloadOutlined,
 } from '@ant-design/icons'
 import {
@@ -9,6 +10,7 @@ import {
   Descriptions,
   Input,
   Popconfirm,
+  Progress,
   Select,
   Space,
   Table,
@@ -20,6 +22,7 @@ import { useEffect, useState } from 'react'
 import { PageFrame } from '@/components/PageFrame'
 import { useSystemStore } from '@/stores/system.store'
 import type { OperationHistoryEntry } from '@/types/system'
+import type { UpdateOperationResult, UpdateState } from '@/types/update'
 import './styles.css'
 
 const registryPresets = [
@@ -39,10 +42,51 @@ export function SettingsPage() {
   const clearError = useSystemStore((state) => state.clearError)
   const [registryChoice, setRegistryChoice] = useState('')
   const [customRegistry, setCustomRegistry] = useState('')
+  const [updateState, setUpdateState] = useState<UpdateState | null>(null)
+  const [updateLoading, setUpdateLoading] = useState(false)
 
   useEffect(() => {
     void load()
   }, [load])
+
+  useEffect(() => {
+    void window.npmate.update.getState().then(setUpdateState)
+    return window.npmate.update.onStateChanged(setUpdateState)
+  }, [])
+
+  const runUpdateOperation = async (
+    operation: () => Promise<UpdateOperationResult>,
+  ) => {
+    setUpdateLoading(true)
+    try {
+      const result = await operation()
+      if (result.data) setUpdateState(result.data)
+      if (!result.ok) {
+        setUpdateState((current) =>
+          current
+            ? {
+                ...current,
+                status: 'error',
+                message: result.error ?? '更新操作失败。',
+              }
+            : current,
+        )
+      }
+    } catch (error) {
+      setUpdateState((current) =>
+        current
+          ? {
+              ...current,
+              status: 'error',
+              message:
+                error instanceof Error ? error.message : '更新操作失败。',
+            }
+          : current,
+      )
+    } finally {
+      setUpdateLoading(false)
+    }
+  }
 
   const historyColumns: ColumnsType<OperationHistoryEntry> = [
     {
@@ -154,6 +198,74 @@ export function SettingsPage() {
                     </Button>
                   </Popconfirm>
                 </Space.Compact>
+              </div>
+            ),
+          },
+          {
+            key: 'updates',
+            label: '应用更新',
+            children: (
+              <div className="update-settings">
+                <Descriptions
+                  bordered
+                  column={1}
+                  items={[
+                    {
+                      key: 'current',
+                      label: '当前版本',
+                      children: updateState?.currentVersion ?? '读取中…',
+                    },
+                    {
+                      key: 'available',
+                      label: '可用版本',
+                      children: updateState?.availableVersion ?? '—',
+                    },
+                  ]}
+                />
+                {updateState?.message && (
+                  <Alert
+                    showIcon
+                    type={updateState.status === 'error' ? 'error' : 'info'}
+                    message={updateState.message}
+                  />
+                )}
+                {updateState?.status === 'downloading' && (
+                  <Progress percent={updateState.downloadPercent ?? 0} />
+                )}
+                <Space>
+                  <Button
+                    icon={<ReloadOutlined />}
+                    loading={updateLoading || updateState?.status === 'checking'}
+                    disabled={updateState?.status === 'disabled'}
+                    onClick={() =>
+                      void runUpdateOperation(window.npmate.update.check)
+                    }
+                  >
+                    检查更新
+                  </Button>
+                  {updateState?.status === 'available' && (
+                    <Button
+                      type="primary"
+                      icon={<CloudDownloadOutlined />}
+                      loading={updateLoading}
+                      onClick={() =>
+                        void runUpdateOperation(window.npmate.update.download)
+                      }
+                    >
+                      下载更新
+                    </Button>
+                  )}
+                  {updateState?.status === 'downloaded' && (
+                    <Button
+                      type="primary"
+                      onClick={() =>
+                        void runUpdateOperation(window.npmate.update.install)
+                      }
+                    >
+                      重启并安装
+                    </Button>
+                  )}
+                </Space>
               </div>
             ),
           },

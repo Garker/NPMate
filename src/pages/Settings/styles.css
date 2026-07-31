@@ -45,6 +45,12 @@
   gap: var(--space-md);
 }
 
+.update-settings {
+  max-width: 46rem;
+  display: grid;
+  gap: var(--space-md);
+}
+
 .registry-settings > span {
   color: var(--color-text-muted);
 }

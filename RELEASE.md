@@ -2,7 +2,7 @@
 
 ## 自动发布流程
 
-GitHub Actions 会在推送 `v*` 标签时，分别在 macOS、Windows 和 Linux runner 上构建安装包，生成 `SHA256SUMS.txt`，然后创建 GitHub Release 并上传全部文件。
+GitHub Actions 会在推送 `v*` 标签时，分别在 macOS、Windows 和 Linux runner 上构建安装包，生成 `electron-updater` 所需的 `latest*.yml` 与差分下载元数据、生成 `SHA256SUMS.txt`，然后创建 GitHub Release 并上传全部文件。
 
 发布新版本：
 
@@ -13,6 +13,10 @@ git push origin v0.2.0
 ```
 
 标签必须与 `package.json` 版本一致，否则构建会失败。也可以在 Actions 页面手动运行 Release 工作流，只构建并保留安装包 artifact，不创建正式 Release。
+
+已安装的正式版本会在启动 5 秒后检查 GitHub Releases。发现新版本后，可在“设置 → 应用更新”中下载，并在下载完成后重启安装。开发模式不会访问更新服务。
+
+> macOS 自动更新要求应用已使用 Developer ID 签名；未签名的本地构建只能用于验证界面与发布元数据。
 
 ### 代码签名
 
