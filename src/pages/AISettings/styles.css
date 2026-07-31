@@ -1,0 +1,55 @@
+/* Hallmark · macrostructure: Split Utility · tone: technical · anchor hue: cobalt
+ * Hallmark · pre-emit critique: P5 H5 E5 S5 R5 V5
+ * contrast: pass (40–41) · tokens: pass (48) · responsive: pass (49)
+ */
+.ai-settings-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(18rem, 0.8fr);
+  gap: var(--space-xl);
+}
+
+.ai-settings-layout > .ant-form {
+  max-width: 42rem;
+}
+
+.ai-security-note {
+  align-self: start;
+  padding: var(--space-lg);
+  background: var(--color-surface);
+  border: var(--rule-hair) solid var(--color-border);
+  border-radius: var(--radius-md);
+}
+
+.ai-security-note > .anticon {
+  color: var(--color-accent);
+  font-size: var(--text-xl);
+}
+
+.ai-security-note h2 {
+  margin: var(--space-md) 0 var(--space-sm);
+  color: var(--color-text-strong);
+  font-family: var(--font-display);
+  font-size: var(--text-lg);
+  font-style: normal;
+}
+
+.ai-security-note p,
+.ai-security-note li {
+  color: var(--color-text-muted);
+}
+
+.ai-security-note ul {
+  padding-inline-start: var(--space-lg);
+}
+
+.ai-feedback {
+  margin-block-start: var(--space-lg);
+  display: grid;
+  gap: var(--space-sm);
+}
+
+@media (max-width: 768px) {
+  .ai-settings-layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

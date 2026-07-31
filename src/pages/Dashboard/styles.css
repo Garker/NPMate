@@ -1,0 +1,73 @@
+.overview-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.25fr) repeat(2, minmax(0, 0.85fr));
+  gap: var(--space-md);
+}
+
+.overview-item {
+  min-width: 0;
+  min-height: 10rem;
+  padding: var(--space-lg);
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-lg);
+  background: var(--color-surface);
+  border: var(--rule-hair) solid var(--color-border);
+  border-radius: var(--radius-md);
+}
+
+.overview-item:first-child {
+  min-height: 12rem;
+}
+
+.overview-item__icon {
+  width: 2.5rem;
+  height: 2.5rem;
+  display: grid;
+  place-items: center;
+  background: var(--color-accent-soft);
+  color: var(--color-accent);
+  border-radius: var(--radius-sm);
+}
+
+.overview-item span,
+.overview-item small {
+  display: block;
+  color: var(--color-text-muted);
+}
+
+.overview-item strong {
+  display: block;
+  margin-block: var(--space-sm);
+  color: var(--color-text-strong);
+  font-family: var(--font-display);
+  font-size: var(--text-2xl);
+  font-variant-numeric: tabular-nums;
+}
+
+.getting-started {
+  margin-block-start: var(--space-2xl);
+  padding-block: var(--space-xl);
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
+  gap: var(--space-xl);
+  align-items: end;
+  border-block-start: var(--rule-hair) solid var(--color-border);
+}
+
+.getting-started h2 {
+  max-width: 18ch;
+  margin: var(--space-sm) 0 0;
+  color: var(--color-text-strong);
+  font-family: var(--font-display);
+  font-size: var(--text-xl);
+  font-style: normal;
+  letter-spacing: -0.03em;
+  line-height: 1.1;
+}
+
+.getting-started p {
+  max-width: 60ch;
+  margin: 0;
+  color: var(--color-text-muted);
+}

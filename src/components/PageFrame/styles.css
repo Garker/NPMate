@@ -1,0 +1,32 @@
+.page-frame {
+  min-width: 0;
+  padding: var(--space-xl);
+}
+
+.page-header {
+  min-width: 0;
+  margin-block-end: var(--space-xl);
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--space-xl);
+}
+
+.page-header h1 {
+  min-width: 0;
+  margin: 0;
+  color: var(--color-text-strong);
+  font-family: var(--font-display);
+  font-size: var(--text-2xl);
+  font-style: normal;
+  font-weight: 650;
+  letter-spacing: -0.04em;
+  line-height: 1.05;
+  overflow-wrap: anywhere;
+}
+
+.page-header p {
+  max-width: 64ch;
+  margin: var(--space-sm) 0 0;
+  color: var(--color-text-muted);
+}
