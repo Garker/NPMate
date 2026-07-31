@@ -12,6 +12,8 @@ import type {
   AITestResult,
   AssistantRequest,
   AssistantResponse,
+  AssistantStreamRequest,
+  AssistantStreamEvent,
   SaveAIConfigInput,
 } from '../../src/types/ai'
 import type {
@@ -43,6 +45,7 @@ const analysisService = new AnalysisService()
 const aiService = new AiService()
 const environmentService = new EnvironmentService()
 const historyService = new HistoryService()
+const assistantStreams = new Map<string, AbortController>()
 
 function success<T>(data: T): ProjectOperationResult<T> {
   return { ok: true, data }
@@ -72,6 +75,40 @@ export function registerIpcHandlers(): void {
       }
     },
   )
+
+  ipcMain.on('ai:assist-stream', (event, request: AssistantStreamRequest) => {
+    const controller = new AbortController()
+    assistantStreams.set(request.requestId, controller)
+    void (async () => {
+      const send = (payload: Omit<AssistantStreamEvent, 'requestId'>) => {
+        if (!event.sender.isDestroyed()) {
+          event.sender.send('ai:assist-stream-event', {
+            requestId: request.requestId,
+            ...payload,
+          } satisfies AssistantStreamEvent)
+        }
+      }
+      try {
+        const stream = await aiService.assistStream(
+          request.projectId,
+          request.messages,
+          controller.signal,
+        )
+        for await (const chunk of stream) send({ chunk })
+        send({ done: true })
+      } catch (error) {
+        send({
+          error: error instanceof Error ? error.message : 'Assistant 请求失败。',
+        })
+      } finally {
+        assistantStreams.delete(request.requestId)
+      }
+    })()
+  })
+
+  ipcMain.on('ai:assist-stream-cancel', (_event, requestId: string) => {
+    assistantStreams.get(requestId)?.abort()
+  })
 
   ipcMain.handle(
     'project:add',

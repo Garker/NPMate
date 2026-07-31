@@ -4,6 +4,8 @@ import { ChatAnthropic } from '@langchain/anthropic'
 import { ChatGoogle } from '@langchain/google'
 import { ChatOllama } from '@langchain/ollama'
 import { ChatOpenAI } from '@langchain/openai'
+import { toBaseMessages, toUIMessageStream } from '@ai-sdk/langchain'
+import type { UIMessage, UIMessageChunk } from 'ai'
 import { eq } from 'drizzle-orm'
 import { safeStorage } from 'electron'
 import { createAgent, tool } from 'langchain'
@@ -201,9 +203,8 @@ export class AiService {
     }
   }
 
-  async assist(request: AssistantRequest): Promise<AssistantResponse> {
-    const config = this.storedConfig()
-    const project = this.projects.get(request.projectId)
+  private assistantAgent(projectId: string, config: StoredConfig) {
+    const project = this.projects.get(projectId)
     const projectAnalysis = tool(
       async () => {
         const packageJson = JSON.parse(
@@ -271,12 +272,17 @@ export class AiService {
         }),
       },
     )
-    const agent = createAgent({
+    return createAgent({
       model: this.model(config),
       tools: [projectAnalysis, npmSearch, dependencyAnalysis, installationAdvice],
       systemPrompt:
         '你是 NPMate Package Assistant。用中文简洁回答。先使用工具了解项目，再给出贴合现有技术栈的建议。不要声称已经安装任何包；你没有安装工具。若推荐新依赖，必须明确说明理由、权衡和建议命令，并提醒用户确认后才能执行。',
     })
+  }
+
+  async assist(request: AssistantRequest): Promise<AssistantResponse> {
+    const config = this.storedConfig()
+    const agent = this.assistantAgent(request.projectId, config)
     try {
       const result = await agent.invoke({
         messages: [{ role: 'user', content: request.prompt }],
@@ -287,6 +293,28 @@ export class AiService {
         provider: config.provider,
         model: config.model,
       }
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Assistant 请求失败。'
+      throw new Error(
+        config.apiKey ? message.replaceAll(config.apiKey, '[REDACTED]') : message,
+        { cause: error },
+      )
+    }
+  }
+
+  async assistStream(
+    projectId: string,
+    messages: UIMessage[],
+    signal?: AbortSignal,
+  ): Promise<ReadableStream<UIMessageChunk>> {
+    const config = this.storedConfig()
+    const agent = this.assistantAgent(projectId, config)
+    try {
+      const events = agent.streamEvents(
+        { messages: await toBaseMessages(messages) },
+        { version: 'v2', signal },
+      )
+      return toUIMessageStream(events)
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Assistant 请求失败。'
       throw new Error(

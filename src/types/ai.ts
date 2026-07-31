@@ -1,4 +1,5 @@
 import type { ProjectOperationResult } from './project'
+import type { UIMessage, UIMessageChunk } from 'ai'
 
 export type AIProvider =
   | 'openai'
@@ -39,6 +40,19 @@ export interface AssistantResponse {
   content: string
   provider: AIProvider
   model: string
+}
+
+export interface AssistantStreamRequest {
+  requestId: string
+  projectId: string
+  messages: UIMessage[]
+}
+
+export interface AssistantStreamEvent {
+  requestId: string
+  chunk?: UIMessageChunk
+  error?: string
+  done?: boolean
 }
 
 export type AIOperationResult<T> = ProjectOperationResult<T>
