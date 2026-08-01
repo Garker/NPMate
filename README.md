@@ -65,6 +65,16 @@ NPMate 是一个基于 Electron + React 的智能 JavaScript 项目依赖管理�
 
 当前自动构建的安装包未进行商业代码签名。macOS 和 Windows 首次启动时可能显示系统安全提示，请只从本仓库的 Releases 下载，并可使用 Release 中的 `SHA256SUMS.txt` 校验文件完整性。
 
+### macOS 提示“已损坏，无法打开”
+
+确认安装包来自本仓库的 Releases，并将 NPMate 拖入“应用程序”文件夹后，在终端运行：
+
+```bash
+xattr -dr com.apple.quarantine /Applications/NPMate.app
+```
+
+然后重新打开 NPMate。命令应直接以 `xattr` 开头，不要在前面添加 `、` 等字符；如果应用安装在其他位置，请相应修改路径。
+
 ## 本地开发
 
 ```bash
