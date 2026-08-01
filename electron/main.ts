@@ -1,6 +1,9 @@
-import { join } from 'node:path'
+import { dirname, join } from 'node:path'
+import { fileURLToPath } from 'node:url'
 import { app, BrowserWindow, shell } from 'electron'
 import { registerIpcHandlers, updateService } from './ipc'
+
+const currentDirectory = dirname(fileURLToPath(import.meta.url))
 
 let mainWindow: BrowserWindow | null = null
 
@@ -18,7 +21,7 @@ function createMainWindow(): void {
     titleBarStyle: process.platform === 'darwin' ? 'hiddenInset' : 'default',
     backgroundColor: '#101317',
     webPreferences: {
-      preload: join(__dirname, '../preload/preload.cjs'),
+      preload: join(currentDirectory, '../preload/preload.cjs'),
       contextIsolation: true,
       nodeIntegration: false,
       sandbox: true,
@@ -40,7 +43,7 @@ function createMainWindow(): void {
   if (process.env.ELECTRON_RENDERER_URL) {
     void mainWindow.loadURL(process.env.ELECTRON_RENDERER_URL)
   } else {
-    void mainWindow.loadFile(join(__dirname, '../renderer/index.html'))
+    void mainWindow.loadFile(join(currentDirectory, '../renderer/index.html'))
   }
 }
 

@@ -5,7 +5,7 @@ import { defineConfig, externalizeDepsPlugin } from 'electron-vite'
 
 export default defineConfig({
   main: {
-    plugins: [externalizeDepsPlugin({ exclude: ['langchain'] })],
+    plugins: [externalizeDepsPlugin({ exclude: ['langchain', '@ai-sdk/langchain'] })],
     build: {
       rollupOptions: {
         input: resolve('electron/main.ts'),
