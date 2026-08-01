@@ -13,6 +13,7 @@ import {
   Form,
   Input,
   List,
+  message,
   Modal,
   Popconfirm,
   Radio,
@@ -53,6 +54,7 @@ export function PackagesPage() {
   const [installedSearchText, setInstalledSearchText] = useState('')
   const [searchText, setSearchText] = useState('')
   const [form] = Form.useForm<InstallFormValues>()
+  const [messageApi, messageContextHolder] = message.useMessage()
   const projects = useProjectsStore((state) => state.projects)
   const selectedProjectId = useProjectsStore((state) => state.selectedProjectId)
   const refreshProject = useProjectsStore((state) => state.refresh)
@@ -116,6 +118,13 @@ export function PackagesPage() {
         dev: item.kind === 'devDependency',
       })
     ) {
+      messageApi.success({
+        content:
+          action === 'uninstall'
+            ? `已卸载 ${item.name}`
+            : `已完成 ${item.name} 的升级`,
+        duration: 5,
+      })
       await refreshProject(selectedProjectId)
     }
   }
@@ -182,10 +191,16 @@ export function PackagesPage() {
             <Button
               size="small"
               icon={<ReloadOutlined />}
-              loading={packageState.executingPackage === item.name}
+              loading={
+                packageState.executingPackage === item.name &&
+                packageState.executingAction === 'upgrade'
+              }
               disabled={
                 packageState.executingPackage !== null &&
-                packageState.executingPackage !== item.name
+                !(
+                  packageState.executingPackage === item.name &&
+                  packageState.executingAction === 'upgrade'
+                )
               }
             >
               升级
@@ -201,7 +216,17 @@ export function PackagesPage() {
               size="small"
               danger
               icon={<DeleteOutlined />}
-              disabled={packageState.executingPackage !== null}
+              loading={
+                packageState.executingPackage === item.name &&
+                packageState.executingAction === 'uninstall'
+              }
+              disabled={
+                packageState.executingPackage !== null &&
+                !(
+                  packageState.executingPackage === item.name &&
+                  packageState.executingAction === 'uninstall'
+                )
+              }
             >
               卸载
             </Button>
@@ -291,6 +316,7 @@ export function PackagesPage() {
         </Space>
       }
     >
+      {messageContextHolder}
       {mode === 'installed' ? (
         !selectedProject ? (
           <Empty description="请先从左侧选择一个项目。" />
@@ -380,7 +406,7 @@ export function PackagesPage() {
         open={installOpen}
         okText="确认安装"
         cancelText="取消"
-        confirmLoading={packageState.executingPackage !== null}
+        confirmLoading={packageState.executingAction === 'install'}
         onCancel={() => setInstallOpen(false)}
         onOk={() => form.submit()}
         destroyOnHidden

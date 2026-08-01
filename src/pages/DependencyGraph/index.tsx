@@ -50,6 +50,9 @@ export function DependencyGraphPage() {
   const refreshProject = useProjectsStore((state) => state.refresh)
   const analysis = useAnalysisStore()
   const executePackage = usePackagesStore((state) => state.execute)
+  const executePackageBatch = usePackagesStore((state) => state.executeBatch)
+  const executingPackage = usePackagesStore((state) => state.executingPackage)
+  const operationTasks = usePackagesStore((state) => state.operationTasks)
   const selectedProject = projects.find(
     (project) => project.id === selectedProjectId,
   )
@@ -75,16 +78,19 @@ export function DependencyGraphPage() {
 
   async function upgrade(items: DependencyUpdate[]) {
     if (!selectedProjectId) return
-    for (const item of items) {
-      if (item.upgradeType === 'current') continue
-      const succeeded = await executePackage({
+    const requests = items
+      .filter((item) => item.upgradeType !== 'current')
+      .map((item) => ({
         projectId: selectedProjectId,
-        action: 'upgrade',
+        action: 'upgrade' as const,
         packageName: item.name,
         version: item.latestVersion,
         dev: item.kind === 'devDependency',
-      })
-      if (!succeeded) break
+      }))
+    if (requests.length === 1) {
+      await executePackage(requests[0]!)
+    } else if (requests.length > 1) {
+      await executePackageBatch(requests)
     }
     await refreshProject(selectedProjectId)
     await analysis.loadUpdates(selectedProjectId)
@@ -93,6 +99,11 @@ export function DependencyGraphPage() {
   const pendingUpdates = analysis.updates.filter(
     (item) => item.upgradeType !== 'current',
   )
+  const packageOperationRunning =
+    executingPackage !== null ||
+    operationTasks.some(
+      (task) => task.status === 'queued' || task.status === 'running',
+    )
   const updateColumns: ColumnsType<DependencyUpdate> = [
     { title: '包', dataIndex: 'name', render: (name) => <strong>{name}</strong> },
     { title: '当前', dataIndex: 'currentRange', width: 130 },
@@ -116,7 +127,11 @@ export function DependencyGraphPage() {
           <Button
             type="text"
             size="small"
-            disabled={item.upgradeType === 'current'}
+            loading={executingPackage === item.name}
+            disabled={
+              item.upgradeType === 'current' ||
+              (packageOperationRunning && executingPackage !== item.name)
+            }
           >
             升级
           </Button>
@@ -191,12 +206,15 @@ export function DependencyGraphPage() {
                   <span>{pendingUpdates.length} 个依赖可升级</span>
                   <Popconfirm
                     title={`批量升级 ${pendingUpdates.length} 个依赖`}
-                    description="命令将依次执行，遇到失败后停止。"
+                    description="命令将依次执行，失败项可在右上角进度中重试。"
                     onConfirm={() => void upgrade(pendingUpdates)}
                   >
                     <Button
                       type="primary"
-                      disabled={pendingUpdates.length === 0}
+                      loading={packageOperationRunning}
+                      disabled={
+                        pendingUpdates.length === 0 || packageOperationRunning
+                      }
                     >
                       批量升级
                     </Button>

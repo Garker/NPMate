@@ -1,0 +1,89 @@
+.package-task-center__trigger {
+  display: inline-flex;
+}
+
+.package-task-center {
+  width: min(25rem, calc(100vw - 2rem));
+}
+
+.package-task-center__header {
+  margin-block-end: var(--space-sm);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-md);
+}
+
+.package-task-center__header strong,
+.package-task-center__header span {
+  display: block;
+}
+
+.package-task-center__header span {
+  margin-block-start: var(--space-2xs);
+  color: var(--color-text-muted);
+  font-size: var(--text-xs);
+}
+
+.package-task-center__list {
+  max-height: min(28rem, calc(100vh - 12rem));
+  margin-block-start: var(--space-sm);
+  overflow: auto;
+  border-block-start: var(--rule-hair) solid var(--color-border);
+}
+
+.package-task {
+  min-width: 0;
+  padding-block: var(--space-sm);
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--space-sm);
+  border-block-end: var(--rule-hair) solid var(--color-border);
+}
+
+.package-task__status {
+  color: var(--color-text-muted);
+}
+
+.package-task__status.is-running {
+  color: var(--color-accent);
+}
+
+.package-task__status.is-success {
+  color: var(--color-success);
+}
+
+.package-task__status.is-failed,
+.package-task__body > span.is-failed {
+  color: var(--color-error);
+}
+
+.package-task__body {
+  min-width: 0;
+}
+
+.package-task__body > div {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+}
+
+.package-task__body strong {
+  overflow: hidden;
+  color: var(--color-text-strong);
+  font-size: var(--text-sm);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.package-task__body > span {
+  display: block;
+  margin-block-start: var(--space-2xs);
+  overflow: hidden;
+  color: var(--color-text-muted);
+  font-size: var(--text-xs);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

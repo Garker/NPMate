@@ -83,6 +83,12 @@
   justify-self: end;
 }
 
+.titlebar__actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+}
+
 .project-rail {
   grid-area: rail;
   padding-block: var(--space-sm);

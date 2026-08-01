@@ -2,6 +2,8 @@ import type { PackageManager, ProjectOperationResult } from './project'
 
 export type DependencyKind = 'dependency' | 'devDependency'
 export type PackageAction = 'install' | 'uninstall' | 'upgrade'
+export type TrackedPackageAction = Exclude<PackageAction, 'install'>
+export type PackageTaskStatus = 'queued' | 'running' | 'success' | 'failed'
 
 export interface InstalledPackage {
   name: string
@@ -31,6 +33,13 @@ export interface PackageCommandResult {
   stderr: string
   startedAt: string
   finishedAt: string
+}
+
+export interface PackageOperationTask {
+  id: string
+  request: PackageCommandRequest & { action: TrackedPackageAction }
+  status: PackageTaskStatus
+  error: string | null
 }
 
 export interface RegistryPackageSummary {

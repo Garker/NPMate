@@ -23,6 +23,7 @@ import { DependencyGraphPage } from '@/pages/DependencyGraph'
 import { AISettingsPage } from '@/pages/AISettings'
 import { SettingsPage } from '@/pages/Settings'
 import { PackageAssistant } from '@/components/PackageAssistant'
+import { PackageTaskCenter } from '@/components/PackageTaskCenter'
 import { useAppStore } from '@/stores/app.store'
 import type { PageKey } from '@/types/navigation'
 import { useDesktopStatus } from '@/hooks/useDesktopStatus'
@@ -183,14 +184,17 @@ export function AppShell() {
           />
         </AutoComplete>
 
-        <Tooltip title={colorMode === 'dark' ? '切换浅色模式' : '切换暗色模式'}>
-          <Button
-            type="text"
-            icon={colorMode === 'dark' ? <SunOutlined /> : <MoonOutlined />}
-            aria-label={colorMode === 'dark' ? '切换浅色模式' : '切换暗色模式'}
-            onClick={toggleColorMode}
-          />
-        </Tooltip>
+        <div className="titlebar__actions">
+          <PackageTaskCenter />
+          <Tooltip title={colorMode === 'dark' ? '切换浅色模式' : '切换暗色模式'}>
+            <Button
+              type="text"
+              icon={colorMode === 'dark' ? <SunOutlined /> : <MoonOutlined />}
+              aria-label={colorMode === 'dark' ? '切换浅色模式' : '切换暗色模式'}
+              onClick={toggleColorMode}
+            />
+          </Tooltip>
+        </div>
       </header>
 
       <aside className="project-rail">
@@ -324,7 +328,7 @@ export function AppShell() {
         </span>
         <span className="statusbar__spacer" />
         <span>{window.npmate?.platform ?? 'web'}</span>
-        <span>v0.1.3</span>
+        <span>v0.1.5</span>
       </footer>
     </div>
   )
