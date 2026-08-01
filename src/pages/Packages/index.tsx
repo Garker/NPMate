@@ -269,7 +269,7 @@ export function PackagesPage() {
       title="包管理"
       description="管理已安装依赖，或从 npm Registry 查找适合项目的包。"
       action={
-        <Space size={8}>
+        <Space size={8} wrap>
           {mode === 'installed' && (
             <Input
               className="package-list-search"

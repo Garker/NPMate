@@ -1,7 +1,7 @@
 import type { PackageAction, PackageOperationResult } from './package'
 
 export interface ToolVersion {
-  name: 'node' | 'npm' | 'pnpm' | 'yarn'
+  name: 'node' | 'npm' | 'pnpm' | 'yarn' | 'bun'
   version: string | null
 }
 

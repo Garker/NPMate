@@ -1,4 +1,4 @@
-export type PackageManager = 'npm' | 'pnpm' | 'yarn' | 'unknown'
+export type PackageManager = 'npm' | 'pnpm' | 'yarn' | 'bun' | 'unknown'
 
 export interface ProjectRecord {
   id: string

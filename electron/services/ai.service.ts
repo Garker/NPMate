@@ -286,6 +286,8 @@ export class AiService {
         const command =
           project.packageManager === 'pnpm'
             ? `pnpm add ${target}`
+            : project.packageManager === 'bun'
+              ? `bun add ${target}`
             : project.packageManager === 'yarn'
               ? `yarn add ${target}`
               : `npm install ${target}`

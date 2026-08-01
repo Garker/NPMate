@@ -7,11 +7,8 @@ import type {
   PackageCommandResult,
   ProjectDependencies,
 } from '../../src/types/package'
-import type { PackageManager } from '../../src/types/project'
-import { createNpmArgs } from './npm.service'
-import { createPnpmArgs } from './pnpm.service'
+import { commandArgs } from './package-command'
 import { ProjectService } from './project.service'
-import { createYarnArgs } from './yarn.service'
 import { HistoryService } from './history.service'
 
 interface PackageJson {
@@ -30,15 +27,6 @@ function assertPackageInput(name: string, version?: string): void {
   if (version && !versionPattern.test(version)) {
     throw new Error('版本格式无效。')
   }
-}
-
-function commandArgs(
-  manager: Exclude<PackageManager, 'unknown'>,
-  request: PackageCommandRequest,
-): string[] {
-  if (manager === 'npm') return createNpmArgs(request)
-  if (manager === 'pnpm') return createPnpmArgs(request)
-  return createYarnArgs(request)
 }
 
 function flattenDependencies(

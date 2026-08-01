@@ -80,9 +80,9 @@ export function registerIpcHandlers(): void {
 
   ipcMain.handle(
     'project:list',
-    (): ProjectOperationResult<ProjectRecord[]> => {
+    async (): Promise<ProjectOperationResult<ProjectRecord[]>> => {
       try {
-        return success(projectService.list())
+        return success(await projectService.list())
       } catch (error) {
         return failure(error)
       }

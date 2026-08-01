@@ -4,10 +4,8 @@ import { basename, join } from 'node:path'
 import { and, eq, isNull } from 'drizzle-orm'
 import { getDatabase } from '../../database/client'
 import { projects } from '../../database/schema'
-import type {
-  PackageManager,
-  ProjectRecord,
-} from '../../src/types/project'
+import type { PackageManager, ProjectRecord } from '../../src/types/project'
+import { detectPackageManager } from './package-manager-detection'
 
 interface PackageJson {
   name?: string
@@ -19,17 +17,6 @@ interface PackageJson {
   devDependencies?: Record<string, string>
 }
 
-interface LockDetection {
-  packageManager: PackageManager
-  lockFile: string | null
-}
-
-const lockCandidates: Array<[string, PackageManager]> = [
-  ['pnpm-lock.yaml', 'pnpm'],
-  ['package-lock.json', 'npm'],
-  ['yarn.lock', 'yarn'],
-]
-
 async function exists(path: string): Promise<boolean> {
   try {
     await access(path)
@@ -37,19 +24,6 @@ async function exists(path: string): Promise<boolean> {
   } catch {
     return false
   }
-}
-
-/**
- * 严格按照需求中的锁文件优先级判断包管理器。
- */
-async function detectPackageManager(projectPath: string): Promise<LockDetection> {
-  for (const [lockFile, packageManager] of lockCandidates) {
-    if (await exists(join(projectPath, lockFile))) {
-      return { packageManager, lockFile }
-    }
-  }
-
-  return { packageManager: 'unknown', lockFile: null }
 }
 
 function detectFramework(packageJson: PackageJson): string {
@@ -200,13 +174,36 @@ export class ProjectService {
     return toProjectRecord(project)
   }
 
-  list(): ProjectRecord[] {
-    return getDatabase()
+  async list(): Promise<ProjectRecord[]> {
+    const database = getDatabase()
+    const records = database
       .select()
       .from(projects)
       .where(isNull(projects.removedAt))
       .all()
       .map(toProjectRecord)
+
+    return Promise.all(
+      records.map(async (record) => {
+        if (record.packageManager !== 'unknown') return record
+
+        const lock = await detectPackageManager(record.path)
+        if (lock.packageManager === 'unknown') return record
+
+        const updatedAt = new Date().toISOString()
+        database
+          .update(projects)
+          .set({
+            packageManager: lock.packageManager,
+            lockFile: lock.lockFile,
+            updatedAt,
+          })
+          .where(eq(projects.id, record.id))
+          .run()
+
+        return { ...record, ...lock, updatedAt }
+      }),
+    )
   }
 
   async add(projectPath: string): Promise<ProjectRecord> {

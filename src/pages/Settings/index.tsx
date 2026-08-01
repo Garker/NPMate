@@ -186,7 +186,7 @@ export function SettingsPage() {
                   )}
                   <Popconfirm
                     title="切换全局 Registry"
-                    description="将更新本机 npm、pnpm 和 yarn 的用户配置。"
+                    description="将更新本机 npm、pnpm 和 yarn 的用户配置；Bun 会沿用 npm Registry 配置。"
                     onConfirm={() => void setRegistry(selectedRegistry)}
                   >
                     <Button

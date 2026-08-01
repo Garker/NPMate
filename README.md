@@ -16,16 +16,16 @@ NPMate 是一个基于 Electron + React 的智能 JavaScript 项目依赖管理�
 - React 19 + TypeScript + Vite renderer。
 - Ant Design、Tailwind CSS、Zustand 基础接入。
 - 开发者工具风格三栏应用壳与暗色模式。
-- Dashboard、Projects、Packages、DependencyGraph、AISettings、Settings 页面入口。
+- Dashboard、Packages、DependencyGraph、AISettings、Settings 页面入口。
 - electron-builder 的 macOS、Windows、Linux 基础配置。
 - 本地目录选择与 `package.json` 扫描。
-- `pnpm-lock.yaml`、`package-lock.json`、`yarn.lock` 包管理器识别。
+- `pnpm-lock.yaml`、`bun.lock`、`bun.lockb`、`package-lock.json`、`yarn.lock` 包管理器识别。
 - React、Vue、Next.js、Nuxt、Angular、Svelte、NestJS、Express、Vite 框架识别。
 - Node 版本、依赖数量与 `node_modules` 大小统计。
 - SQLite + Drizzle ORM 项目持久化。
 - 项目刷新、打开目录、软删除与撤销。
 - 读取并区分 `dependencies` 与 `devDependencies`。
-- 使用项目锁文件对应的 npm、pnpm 或 yarn 执行命令。
+- 使用项目锁文件对应的 npm、pnpm、yarn 或 Bun 执行命令。
 - 安装包、指定版本安装、卸载包与单包升级。
 - 命令执行前确认、执行状态及 stdout / stderr 结果反馈。
 - npm Registry 关键词搜索与周下载量展示。
@@ -37,14 +37,14 @@ NPMate 是一个基于 Electron + React 的智能 JavaScript 项目依赖管理�
 - 单个升级与按顺序执行的批量升级。
 - 基于 `npm ls --all --json` 的 React Flow 依赖关系图。
 - `node_modules` 顶层包体积排行与重复版本检测。
-- 根据包管理器生成 npm、pnpm、yarn 去重建议。
+- 根据包管理器生成 npm、pnpm、yarn、Bun 去重建议。
 - OpenAI、DeepSeek、阿里百炼和自定义 OpenAI Compatible API。
 - Claude、Gemini 与 Ollama 原生 LangChain.js 适配。
 - AI 配置和连接测试。
 - API Key 使用 Electron `safeStorage` 加密后存入 SQLite。
 - Package Assistant 项目分析、npm 搜索、依赖分析与安装建议工具。
 - Agent 只提供建议，未注册文件写入、shell 或安装工具。
-- Node、npm、pnpm、yarn 版本与 nvm、fnm、Volta 检测。
+- Node、npm、pnpm、yarn、Bun 版本与 nvm、fnm、Volta 检测。
 - npm 官方源、npmmirror 和自定义 Registry 切换。
 - 安装、卸载、升级命令与执行结果历史。
 - macOS DMG/ZIP、Windows NSIS、Linux AppImage/DEB 打包配置。

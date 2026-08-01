@@ -8,7 +8,7 @@
 }
 
 .package-list-search {
-  width: min(24rem, 32vw);
+  width: min(24rem, 100%);
 }
 
 .package-summary {

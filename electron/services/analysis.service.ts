@@ -217,6 +217,8 @@ export class AnalysisService {
       dedupeCommand:
         project.packageManager === 'pnpm'
           ? 'pnpm dedupe'
+          : project.packageManager === 'bun'
+            ? 'bun install'
           : project.packageManager === 'yarn'
             ? 'yarn dedupe'
             : 'npm dedupe',

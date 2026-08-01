@@ -28,11 +28,12 @@ function assertRegistry(url: string): string {
 
 export class EnvironmentService {
   async inspect(): Promise<EnvironmentInfo> {
-    const [node, npm, pnpm, yarn, volta, registry] = await Promise.all([
+    const [node, npm, pnpm, yarn, bun, volta, registry] = await Promise.all([
       run('node', ['--version']),
       run('npm', ['--version']),
       run('pnpm', ['--version']),
       run('yarn', ['--version']),
+      run('bun', ['--version']),
       run('volta', ['--version']),
       run('npm', ['config', 'get', 'registry']),
     ])
@@ -42,6 +43,7 @@ export class EnvironmentService {
         { name: 'npm', version: npm },
         { name: 'pnpm', version: pnpm },
         { name: 'yarn', version: yarn },
+        { name: 'bun', version: bun },
       ],
       managers: {
         nvm: Boolean(process.env.NVM_DIR),

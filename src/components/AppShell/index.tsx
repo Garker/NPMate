@@ -1,7 +1,6 @@
 import {
   AppstoreOutlined,
   BranchesOutlined,
-  FolderOpenOutlined,
   MoonOutlined,
   RobotOutlined,
   SearchOutlined,
@@ -19,7 +18,6 @@ import {
 } from 'react'
 import type { RefSelectProps } from 'antd'
 import { DashboardPage } from '@/pages/Dashboard'
-import { ProjectsPage } from '@/pages/Projects'
 import { PackagesPage } from '@/pages/Packages'
 import { DependencyGraphPage } from '@/pages/DependencyGraph'
 import { AISettingsPage } from '@/pages/AISettings'
@@ -39,7 +37,6 @@ interface NavItem {
 
 const navItems: NavItem[] = [
   { key: 'dashboard', label: '概览', icon: AppstoreOutlined },
-  { key: 'projects', label: '项目', icon: FolderOpenOutlined },
   { key: 'packages', label: '包管理', icon: SearchOutlined },
   { key: 'dependency-graph', label: '依赖分析', icon: BranchesOutlined },
   { key: 'ai-settings', label: 'AI 设置', icon: RobotOutlined },
@@ -48,7 +45,6 @@ const navItems: NavItem[] = [
 
 const pages: Record<PageKey, ComponentType> = {
   dashboard: DashboardPage,
-  projects: ProjectsPage,
   packages: PackagesPage,
   'dependency-graph': DependencyGraphPage,
   'ai-settings': AISettingsPage,
@@ -328,7 +324,7 @@ export function AppShell() {
         </span>
         <span className="statusbar__spacer" />
         <span>{window.npmate?.platform ?? 'web'}</span>
-        <span>v0.1.0</span>
+        <span>v0.1.3</span>
       </footer>
     </div>
   )
