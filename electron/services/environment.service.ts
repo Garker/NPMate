@@ -1,9 +1,14 @@
 import { spawn } from 'node:child_process'
 import type { EnvironmentInfo } from '../../src/types/system'
+import { commandEnvironment } from './command-environment'
 
-function run(command: string, args: string[]): Promise<string | null> {
+function run(
+  command: string,
+  args: string[],
+  environment: NodeJS.ProcessEnv,
+): Promise<string | null> {
   return new Promise((resolve) => {
-    const child = spawn(command, args, { shell: false, env: process.env })
+    const child = spawn(command, args, { shell: false, env: environment })
     let output = ''
     child.stdout.on('data', (chunk: Buffer) => {
       output += chunk.toString()
@@ -28,14 +33,15 @@ function assertRegistry(url: string): string {
 
 export class EnvironmentService {
   async inspect(): Promise<EnvironmentInfo> {
+    const environment = await commandEnvironment({ refresh: true })
     const [node, npm, pnpm, yarn, bun, volta, registry] = await Promise.all([
-      run('node', ['--version']),
-      run('npm', ['--version']),
-      run('pnpm', ['--version']),
-      run('yarn', ['--version']),
-      run('bun', ['--version']),
-      run('volta', ['--version']),
-      run('npm', ['config', 'get', 'registry']),
+      run('node', ['--version'], environment),
+      run('npm', ['--version'], environment),
+      run('pnpm', ['--version'], environment),
+      run('yarn', ['--version'], environment),
+      run('bun', ['--version'], environment),
+      run('volta', ['--version'], environment),
+      run('npm', ['config', 'get', 'registry'], environment),
     ])
     return {
       tools: [
@@ -46,9 +52,9 @@ export class EnvironmentService {
         { name: 'bun', version: bun },
       ],
       managers: {
-        nvm: Boolean(process.env.NVM_DIR),
-        fnm: Boolean(process.env.FNM_DIR || process.env.FNM_MULTISHELL_PATH),
-        volta: Boolean(process.env.VOLTA_HOME || volta),
+        nvm: Boolean(environment.NVM_DIR),
+        fnm: Boolean(environment.FNM_DIR || environment.FNM_MULTISHELL_PATH),
+        volta: Boolean(environment.VOLTA_HOME || volta),
       },
       registry: registry ?? 'https://registry.npmjs.org/',
     }
@@ -56,6 +62,7 @@ export class EnvironmentService {
 
   async setRegistry(url: string): Promise<EnvironmentInfo> {
     const value = assertRegistry(url)
+    const environment = await commandEnvironment({ refresh: true })
     const commands: Array<[string, string[]]> = [
       ['npm', ['config', 'set', 'registry', value]],
       ['pnpm', ['config', 'set', 'registry', value]],
@@ -63,7 +70,7 @@ export class EnvironmentService {
     ]
     let changed = false
     for (const [command, args] of commands) {
-      const result = await run(command, args)
+      const result = await run(command, args, environment)
       if (result !== null) changed = true
     }
     if (!changed) throw new Error('没有可用的包管理器可以更新 Registry。')

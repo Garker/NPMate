@@ -1,4 +1,3 @@
-import { spawn } from 'node:child_process'
 import { lstat, readFile, readdir } from 'node:fs/promises'
 import { join } from 'node:path'
 import type {
@@ -10,14 +9,9 @@ import type {
   UpgradeType,
 } from '../../src/types/analysis'
 import type { InstalledPackage } from '../../src/types/package'
+import { runNpmTree, type NpmTreeNode } from './npm-tree'
 import { PackageManagerService } from './package-manager.service'
 import { ProjectService } from './project.service'
-
-interface NpmTreeNode {
-  name?: string
-  version?: string
-  dependencies?: Record<string, NpmTreeNode>
-}
 
 interface InstalledPackageJson {
   name?: string
@@ -93,28 +87,6 @@ async function installedPackageDirectories(root: string): Promise<string[]> {
     }
   }
   return directories
-}
-
-function runNpmTree(cwd: string): Promise<NpmTreeNode> {
-  return new Promise((resolve, reject) => {
-    const child = spawn('npm', ['ls', '--all', '--json'], {
-      cwd,
-      shell: false,
-      env: process.env,
-    })
-    let stdout = ''
-    let stderr = ''
-    child.stdout.on('data', (chunk: Buffer) => (stdout += chunk.toString()))
-    child.stderr.on('data', (chunk: Buffer) => (stderr += chunk.toString()))
-    child.on('error', reject)
-    child.on('close', () => {
-      try {
-        resolve(JSON.parse(stdout) as NpmTreeNode)
-      } catch {
-        reject(new Error(stderr.trim() || '无法读取 npm 依赖树。'))
-      }
-    })
-  })
 }
 
 function duplicateVersions(tree: NpmTreeNode): DuplicateDependency[] {

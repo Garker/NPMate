@@ -1,5 +1,11 @@
 # NPMate Release Notes
 
+## 0.1.4
+
+- 修复从 Finder 等图形界面启动时无法找到 nvm、fnm 或 Volta 管理的 Node.js/npm，导致依赖分析报 `spawn npm ENOENT` 的问题。
+- “设置 → Node 环境 → 重新检测”现在会刷新登录 Shell 环境并正确显示工具版本。
+- 包安装、升级、卸载与依赖树分析统一使用恢复后的命令环境。
+
 ## 0.1.3
 
 - 新增 Bun 项目识别与安装、升级、卸载命令支持。

@@ -8,6 +8,7 @@ import type {
   ProjectDependencies,
 } from '../../src/types/package'
 import { commandArgs } from './package-command'
+import { commandEnvironment } from './command-environment'
 import { ProjectService } from './project.service'
 import { HistoryService } from './history.service'
 
@@ -69,6 +70,7 @@ export class PackageManagerService {
     }
 
     const args = commandArgs(project.packageManager, request)
+    const environment = await commandEnvironment()
     const startedAt = new Date().toISOString()
     const result = await new Promise<{
       exitCode: number
@@ -78,7 +80,7 @@ export class PackageManagerService {
       const child = spawn(project.packageManager, args, {
         cwd: project.path,
         shell: false,
-        env: process.env,
+        env: environment,
       })
       let stdout = ''
       let stderr = ''
